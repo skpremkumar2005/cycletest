@@ -1,0 +1,7 @@
+yacc -d for.y
+flex for.l
+gcc y.tab.c lex.yy.c -o parser -lfl
+./parser
+
+Enter the expression:
+if(a==1) then b=1; else b=2;

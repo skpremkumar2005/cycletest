@@ -1,0 +1,10 @@
+yacc -d for.y
+flex for.l
+gcc y.tab.c lex.yy.c -o parser -lfl
+./parser
+
+float sum(int term) {
+    float result;
+    result = result + term;
+    return result;
+}

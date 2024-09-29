@@ -1,0 +1,3 @@
+gcc Lex.c
+./a.out
+Enter the file name: Input.c

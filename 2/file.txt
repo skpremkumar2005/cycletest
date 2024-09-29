@@ -1,0 +1,4 @@
+flex count.l
+gcc lex.yy.c -o count
+
+./count

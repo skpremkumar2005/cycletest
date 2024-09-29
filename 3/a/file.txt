@@ -1,0 +1,7 @@
+yacc -d for.y
+flex for.l
+gcc y.tab.c lex.yy.c -o parser -lfl
+./parser
+
+for(i=0;i<n;i++)
+i=i+1;
