@@ -1,0 +1,6 @@
+flex Calculator.l
+yacc -d Calculator.y
+gcc lex.yy.c y.tab.c -o calculator -lfl
+./calculator
+
+just calculator
