@@ -1,0 +1,27 @@
+Enter the Number of Values: 3
+Left: a
+Right: b+c
+Left: b
+Right: d+e
+Left: c
+Right: f+g
+
+Intermediate Code:
+a = b+c
+b = d+e
+c = f+g
+
+After Dead Code Elimination:
+a = b+c
+b = d+e
+c = f+g
+
+After Common Subexpression Elimination:
+a = b+c
+b = d+e
+c = f+g
+
+Optimized Code:
+a = b+c
+b = d+e
+c = f+g

@@ -1,0 +1,16 @@
+Enter the Three Address Code (type 'exit' to stop):
+a = b + c
+b = d * e
+exit
+
+
+
+The Equivalent Assembly Code is:
+
+Mov R0, b
+Add c, R0
+Mov a, R0
+
+Mov R1, d
+Mul e, R1
+Mov b, R1
