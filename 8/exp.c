@@ -1,114 +1,116 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-// #include <conio.h>
 
+// Structure to represent a register
 typedef struct {
     char var[10];
     int alive;
-} regist;
+} Register;
 
-regist preg[10];
+Register registers[10] = {0};  // Initialize all registers as unused
 
-void substring(char exp[], int st, int end) {
-    int i, j = 0;
-    char dup[10] = "";
-    for (i = st; i < end; i++) {
-        dup[j++] = exp[i];
-    }
-    dup[j] = '\0';  // Proper string termination
-    strcpy(exp, dup);
-}
-
-int getregister(char var[]) {
-    int i;
-    for (i = 0; i < 10; i++) {
-        if (preg[i].alive == 0) {  // Find first available register
-            strcpy(preg[i].var, var);
+// Function to get an available register
+int getRegister() {
+    for (int i = 0; i < 10; i++) {
+        if (registers[i].alive == 0) {
+            registers[i].alive = 1;
             return i;
         }
     }
-    return -1;  // In case no register is available
+    return -1;
 }
 
-void getvar(char exp[], char v[]) {
-    int i, j = 0;
-    char var[10] = "";
+// Function to parse the three address code and extract components
+void parseInstruction(char* input, char* result, char* op1, char* op2, char* operator) {
+    char* token;
     
-    for (i = 0; exp[i] != '\0'; i++) {
-        if (isalpha(exp[i])) {  // Get the first variable
-            var[j++] = exp[i];
-        } else {
+    // Get result (left side of =)
+    token = strtok(input, "=");
+    sscanf(token, "%s", result);
+    
+    // Get the rest of the expression
+    token = strtok(NULL, "=");
+    
+    // Extract first operand
+    while (*token == ' ') token++; // Skip leading spaces
+    int i = 0;
+    while (*token != ' ' && *token != '\0' && !strchr("+-*/", *token)) {
+        op1[i++] = *token++;
+    }
+    op1[i] = '\0';
+    
+    // Extract operator
+    while (*token == ' ') token++; // Skip spaces
+    *operator = *token;
+    token++;
+    
+    // Extract second operand
+    while (*token == ' ') token++; // Skip spaces
+    sscanf(token, "%s", op2);
+}
+
+int main() {
+    char instruction[50];
+    char result[10], op1[10], op2[10], operator;
+    char instructions[100][50];  // Store instructions
+    int instruction_count = 0;
+    
+    printf("Enter the Three Address Code (type 'exit' to end input):\n");
+    
+    // Read all instructions first
+    while (1) {
+        fgets(instruction, sizeof(instruction), stdin);
+        instruction[strcspn(instruction, "\n")] = 0; // Remove newline
+        
+        if (strcmp(instruction, "exit") == 0) {
             break;
         }
+        
+        strcpy(instructions[instruction_count++], instruction);
     }
-    var[j] = '\0';  // Proper string termination
-    strcpy(v, var);
-}
-
-void main() {
-    char basic[10][10], var[10][10], fstr[10], op;
-    int i, j, k, reg, vc = 0, flag = 0;
-
-    clrscr();
-
-    printf("\nEnter the Three Address Code (type 'exit' to stop):\n");
     
-    // Input three address code
-    for (i = 0; ; i++) {
-        gets(basic[i]);
-        if (strcmp(basic[i], "exit") == 0)  // Stop when user enters "exit"
-            break;
-    }
-
+    // Print the assembly code header
     printf("\nThe Equivalent Assembly Code is:\n");
-
-    // Process each three-address code line
-    for (j = 0; j < i; j++) {
-        getvar(basic[j], var[vc++]);
-        strcpy(fstr, var[vc - 1]);
-
-        substring(basic[j], strlen(var[vc - 1]) + 1, strlen(basic[j]));
-
-        getvar(basic[j], var[vc++]);
-        reg = getregister(var[vc - 1]);
-
-        if (preg[reg].alive == 0) {
-            printf("\nMov R%d, %s", reg, var[vc - 1]);
-            preg[reg].alive = 1;
-        }
-
-        op = basic[j][strlen(var[vc - 1])];
-
-        substring(basic[j], strlen(var[vc - 1]) + 1, strlen(basic[j]));
-
-        getvar(basic[j], var[vc++]);
-
-        // Switch case to handle different operations
-        switch (op) {
-            case '+': printf("\nAdd "); break;
-            case '-': printf("\nSub "); break;
-            case '*': printf("\nMul "); break;
-            case '/': printf("\nDiv "); break;
-        }
-
-        flag = 1;
-        for (k = 0; k <= reg; k++) {
-            if (strcmp(preg[k].var, var[vc - 1]) == 0) {
-                printf("R%d, R%d", k, reg);
-                preg[k].alive = 0;
-                flag = 0;
+    
+    // Process each instruction
+    for (int i = 0; i < instruction_count; i++) {
+        // Parse the instruction
+        parseInstruction(instructions[i], result, op1, op2, &operator);
+        
+        // Get registers for operands
+        int reg1 = getRegister();
+        int reg2 = getRegister();
+        
+        // Generate assembly code with proper indentation
+        printf("\tMOV R%d, %s\n", reg1, op1);
+        printf("\tMOV R%d, %s\n", reg2, op2);
+        
+        switch (operator) {
+            case '+':
+                printf("\tADD R%d, R%d\n", reg1, reg2);
                 break;
-            }
+            case '-':
+                printf("\tSUB R%d, R%d\n", reg1, reg2);
+                break;
+            case '*':
+                printf("\tMUL R%d, R%d\n", reg1, reg2);
+                break;
+            case '/':
+                printf("\tDIV R%d, R%d\n", reg1, reg2);
+                break;
         }
-
-        if (flag) {
-            printf(" %s, R%d", var[vc - 1], reg);
-            printf("\nMov %s, R%d", fstr, reg);
+        
+        printf("\tMOV %s, R%d\n", result, reg1);
+        
+        if (i < instruction_count - 1) {
+            printf("\n");  // Add blank line between instructions
         }
-
-        strcpy(preg[reg].var, var[vc - 3]);
+        
+        // Free the registers
+        registers[reg1].alive = 0;
+        registers[reg2].alive = 0;
     }
-
-    getch();
+    
+    return 0;
 }
